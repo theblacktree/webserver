@@ -1,6 +1,6 @@
 # webserver
 </p>这是一个webserver项目，作者目前学生，学做项目准备找工作
-这个项目是目前作者的一个学习项目，接下来几个月内会不停修改，如果有对这方面感兴趣的朋友运行了此程序，希望可以给些建议，并给个小红心。</p>
+这个项目是目前作者的一个学习项目，接下来几个月内会不停修改，如果有对这方面感兴趣的朋友运行了此程序，希望可以给些建议，并给个小红心,本人联系方式：vx:Lv2shaonian。</p>
 </p>程序运行：<br>
 git clone https://github.com/theblacktree/webserver.git <br>         
     g++ *.cpp -o webs -pthread进行编译<br>
