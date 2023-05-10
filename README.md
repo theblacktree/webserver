@@ -6,3 +6,5 @@ git clone https://github.com/theblacktree/webserver.git <br>
     g++ *.cpp -o webs -pthread进行编译<br>
 ./webs 10000运行可执行文件，指定10000端口号<br>
 ifconfig查看自己的ip地址，在任何一台电脑上浏览器上输入http://192.168.xxx.xxx:10000/index.html</p>
+
+</p>2023.5.10第一次修改：修改了locker头文件，仿照locker_guard实现自己的locker_guarder,并在threadpool.h中使用了locker_guarder,创建局部锁类，利用类脱离作用域自动析构的特点实现raii思想的互斥锁，缺点是使用不够灵活，加了if(1)限定作用域。
