@@ -4,37 +4,25 @@
 #include <exception>
 #include <pthread.h>
 #include <semaphore.h>
-
+#include <mutex>
 // 线程同步机制封装类
-
 // 互斥锁类
-class locker {
+class lock_guarder {
 public:
-    locker() {
-        if(pthread_mutex_init(&m_mutex, NULL) != 0) {
+    explicit lock_guarder(pthread_mutex_t& mut) :m_mutex(mut){
+        if(pthread_mutex_lock(&m_mutex) != 0) 
             throw std::exception();
-        }
     }
 
-    ~locker() {
-        pthread_mutex_destroy(&m_mutex);
+    ~lock_guarder() {
+        pthread_mutex_unlock(&m_mutex);
     }
 
-    bool lock() {
-        return pthread_mutex_lock(&m_mutex) == 0;
-    }
-
-    bool unlock() {
-        return pthread_mutex_unlock(&m_mutex) == 0;
-    }
-
-    pthread_mutex_t *get()
-    {
-        return &m_mutex;
-    }
-
+    lock_guarder(const lock_guarder &)=delete;
+    lock_guarder& operator =(const lock_guarder& )=delete;
 private:
-    pthread_mutex_t m_mutex;
+    pthread_mutex_t& m_mutex;
+
 };
 
 

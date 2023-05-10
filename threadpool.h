@@ -12,7 +12,7 @@ template<typename T>
 class threadpool {
 public:
     /*thread_number是线程池中线程的数量，max_requests是请求队列中最多允许的、等待处理的请求的数量*/
-    threadpool(int thread_number = 8, int max_requests = 10000);
+    threadpool(int thread_number = 16, int max_requests = 10000);
     ~threadpool();
     bool append(T* request);
 
@@ -35,7 +35,8 @@ private:
     std::list< T* > m_workqueue;  
 
     // 保护请求队列的互斥锁
-    locker m_queuelocker;   
+   // locker m_queuelocker;
+    pthread_mutex_t mu;  
 
     // 是否有任务需要处理
     sem m_queuestat;
@@ -83,13 +84,13 @@ template< typename T >
 bool threadpool< T >::append( T* request )
 {
     // 操作工作队列时一定要加锁，因为它被所有线程共享。
-    m_queuelocker.lock();
-    if ( m_workqueue.size() > m_max_requests ) {
-        m_queuelocker.unlock();
-        return false;
+    if (1)
+    {
+        lock_guarder lg(mu);
+        if ( m_workqueue.size() > m_max_requests ) 
+            return false;
+        m_workqueue.push_back(request);
     }
-    m_workqueue.push_back(request);
-    m_queuelocker.unlock();
     m_queuestat.post();
     return true;
 }
@@ -107,18 +108,17 @@ void threadpool< T >::run() {
 
     while (!m_stop) {
         m_queuestat.wait();
-        m_queuelocker.lock();
-        if ( m_workqueue.empty() ) {
-            m_queuelocker.unlock();
-            continue;
+        T* request=nullptr;
+        if(1)
+        {
+            lock_guarder lg(mu);
+            if (!m_workqueue.empty() ) {  
+            request = m_workqueue.front();
+            m_workqueue.pop_front();
         }
-        T* request = m_workqueue.front();
-        m_workqueue.pop_front();
-        m_queuelocker.unlock();
-        if ( !request ) {
-            continue;
-        }
-        request->process();
+        }        
+        if (request)
+            request->process();
     }
 
 }
