@@ -10,7 +10,10 @@
 #include <sys/epoll.h>
 #include "threadpool.h"
 #include "http_conn.h"
-
+#include <memory>
+#include <vector>
+#include <array>
+using namespace std;
 #define MAX_FD 65536   // 最大的文件描述符个数
 #define MAX_EVENT_NUMBER 10000  // 监听的最大的事件数量
 
@@ -29,24 +32,15 @@ void addsig(int sig, void( handler )(int)){
 int main( int argc, char* argv[] ) {
     
     if( argc <= 1 ) {
-        printf( "usage: %s port_number\n", basename(argv[0]));
+        printf( "usage: %s port_number\n注释:你必须指定端口号\n", basename(argv[0]));
         return 1;
     }
 
     int port = atoi( argv[1] );
     addsig( SIGPIPE, SIG_IGN );
-
-    threadpool< http_conn >* pool = NULL;
-    try {
-        pool = new threadpool<http_conn>;
-    } catch( ... ) {
-        return 1;
-    }
-
-    http_conn* users = new http_conn[ MAX_FD ];
-
+    threadpool<http_conn>* pool=threadpool<http_conn>::getPoolInst();
+    vector<http_conn> users(MAX_FD);
     int listenfd = socket( PF_INET, SOCK_STREAM, 0 );
-
     int ret = 0;
     struct sockaddr_in address;
     address.sin_addr.s_addr = INADDR_ANY;
@@ -60,7 +54,7 @@ int main( int argc, char* argv[] ) {
     ret = listen( listenfd, 5 );
 
     // 创建epoll对象，和事件数组，添加
-    epoll_event events[ MAX_EVENT_NUMBER ];
+    array<epoll_event,MAX_EVENT_NUMBER> events;
     int epollfd = epoll_create( 5 );
     // 添加到epoll对象中
     addfd( epollfd, listenfd, false );
@@ -68,7 +62,7 @@ int main( int argc, char* argv[] ) {
 
     while(true) {
         
-        int number = epoll_wait( epollfd, events, MAX_EVENT_NUMBER, -1 );
+        int number = epoll_wait( epollfd, events.data(), MAX_EVENT_NUMBER, -1 );
         
         if ( ( number < 0 ) && ( errno != EINTR ) ) {
             printf( "epoll failure\n" );
@@ -103,7 +97,7 @@ int main( int argc, char* argv[] ) {
             } else if(events[i].events & EPOLLIN) {
 
                 if(users[sockfd].read()) {
-                    pool->append(users + sockfd);
+                    pool->append(users[sockfd]);
                 } else {
                     users[sockfd].close_conn();
                 }
@@ -120,7 +114,6 @@ int main( int argc, char* argv[] ) {
     
     close( epollfd );
     close( listenfd );
-    delete [] users;
-    delete pool;
+    threadpool<http_conn>::delPoolInst();
     return 0;
 }
