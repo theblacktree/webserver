@@ -9,6 +9,7 @@
 #include <array>
 #include "locker.h"
 #include <memory>
+#include <string_view>
 using namespace std;
 // 线程池类，将它定义为模板类是为了代码复用，模板参数T是任务类
 template<typename T>

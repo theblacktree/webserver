@@ -1,5 +1,5 @@
 #include "http_conn.h"
-
+using namespace std;
 // 定义HTTP响应的一些状态信息
 const char* ok_200_title = "OK";
 const char* error_400_title = "Bad Request";
@@ -12,7 +12,7 @@ const char* error_500_title = "Internal Error";
 const char* error_500_form = "There was an unusual problem serving the requested file.\n";
 
 // 网站的根目录
-const char* doc_root = "/home/ikun/gitikun/webserver/webserver/resources";
+string_view doc_root = "/home/ikun/gitikun/webserver/webserver/resources";
 
 int setnonblocking( int fd ) {
     int old_option = fcntl( fd, F_GETFL );
@@ -287,8 +287,9 @@ http_conn::HTTP_CODE http_conn::process_read() {
 http_conn::HTTP_CODE http_conn::do_request()
 {
     // "/home/nowcoder/webserver/resources"
-    strcpy( m_real_file, doc_root );
-    int len = strlen( doc_root );
+    int len = doc_root.size();
+    doc_root.copy(m_real_file,len);
+
     strncpy( m_real_file + len, m_url, FILENAME_LEN - len - 1 );
     // 获取m_real_file文件的相关的状态信息，-1失败，0成功
     if ( stat( m_real_file, &m_file_stat ) < 0 ) {
