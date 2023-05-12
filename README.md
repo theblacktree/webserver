@@ -7,4 +7,8 @@ git clone https://github.com/theblacktree/webserver.git <br>
 ./webs 10000运行可执行文件，指定10000端口号<br>
 ifconfig查看自己的ip地址，在任何一台电脑上浏览器上输入http://192.168.xxx.xxx:10000/index.html</p>
 
-</p>2023.5.10第一次修改：修改了locker头文件，仿照locker_guard实现自己的locker_guarder,并在threadpool.h中使用了locker_guarder,创建局部锁类，利用类脱离作用域自动析构的特点实现raii思想的互斥锁，缺点是使用不够灵活，加了if(1)限定作用域。
+</p>2023.5.10第一次修改：修改了locker头文件，仿照locker_guard实现自己的locker_guarder,并在threadpool.h中使用了locker_guarder,创建局部锁类，利用类脱离作用域自动析构的特点实现raii思想的互斥锁，缺点是使用不够灵活，加了if(1)限定作用域。</p>
+
+</p>  
+2023.5.12第二次修改，本次修改主要是更加的c++,而不是c，具体的改进有：使用单例模式创建线程池，用c++11标准的rarry和vector代替部分c数组，c++17标准的string_view类型代替部分函数传参无需修改的const char* 类型字符串。
+</p>
